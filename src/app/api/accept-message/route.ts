@@ -6,9 +6,10 @@ import { authOptions } from "../auth/[...nextauth]/options";
 
 
 
-dbConnect();
+
 
 export async function POST(request : Request){
+    await dbConnect();
     const session =  await getServerSession(authOptions);
     if(!session || !session.user) {
         return NextResponse.json({

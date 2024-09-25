@@ -1,3 +1,4 @@
+import dbConnect from "@/lib/dbconnection";
 import userModel from "@/models/User";
 import { NextResponse } from "next/server";
 
@@ -6,6 +7,7 @@ interface usecreate{
     username : string
 }
 export async function POST(request : Request){
+    await dbConnect();
    try{ 
     const {createdAt , username} = <usecreate> await request.json();
     const result = await userModel.updateOne(

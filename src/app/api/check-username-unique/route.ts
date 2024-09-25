@@ -3,10 +3,10 @@ import userModel from "@/models/User";
 import { userNameValidator } from "@/schemas/signUpSchema";
 import { NextResponse } from "next/server";
 
-dbConnect();
+
 
 export async function GET(request : Request){
-   
+   await dbConnect();
    try{
     const {searchParams} = new URL(request.url);
     const queryParams = {
