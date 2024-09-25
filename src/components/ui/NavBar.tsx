@@ -8,30 +8,7 @@ const NavBar = () => {
       className="mr-4 block cursor-pointer py-1.5 text-base text-gray-200 font-semibold">
       Anonynouse Message
     </a>
-    <div className="hidden lg:block">
-      <ul className="flex flex-col gap-2 mt-2 mb-4 lg:mb-0 lg:mt-0 lg:flex-row lg:items-center lg:gap-6">
-        <li className="flex items-center p-1 text-sm gap-x-2 text-gray-200">
-          <a href="#" className="flex items-center">
-            Markets
-          </a>
-        </li>
-        <li className="flex items-center p-1 text-sm gap-x-2 text-gray-200">
-          <a href="#" className="flex items-center">
-            Wallet
-          </a>
-        </li>
-        <li className="flex items-center p-1 text-sm gap-x-2 text-gray-200">
-          <a href="#" className="flex items-center">
-            Exchange
-          </a>
-        </li>
-        <li className="flex items-center p-1 text-sm gap-x-2 text-gray-200">
-          <a href="#" className="flex items-center">
-            Support
-          </a>
-        </li>
-      </ul>
-    </div>
+   
  
   </div>
 </nav>
