@@ -18,6 +18,7 @@ import { signUpValidator } from "@/schemas/signUpSchema";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Loader from "@/components/ui/Loader";
 
 
 
@@ -30,7 +31,7 @@ const SignUp = () => {
   const [isUserNameUniqueMessage, setIsUserNameUniqueMessage] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
+  const [isSignedup , setisSignedup] = useState(false);
   const form = useForm<z.infer<typeof signUpValidator>>({
     resolver: zodResolver(signUpValidator),
     defaultValues: {
@@ -40,11 +41,13 @@ const SignUp = () => {
   });
 
   const onSubmit = async (values: z.infer<typeof signUpValidator>) => {
+    setisSignedup(false);
     const response = await axios.post("/api/sign-up", values);
     const url = `/verify/${username}?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`;
 
     // Redirect to the verification page with query parameters
     router.push(url);
+    setisSignedup(true);
   };
 
   useEffect(() => {
@@ -155,7 +158,11 @@ const SignUp = () => {
               {!isUserNameUnique ? (
                <Button type="submit" disabled>Submit</Button>
               ) : (
-                <Button type="submit">Submit</Button>
+                
+                  (isSignedup)? 
+                    (<Button type="submit">Submit</Button>)
+                  : (<Loader/>)
+                
               )}
             </div>
           </form>

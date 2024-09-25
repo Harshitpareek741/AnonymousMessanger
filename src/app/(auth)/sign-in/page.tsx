@@ -4,7 +4,7 @@ import React, { useState } from "react"; // Removed unused useEffect import
 import { useDebounceValue } from "usehooks-ts";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Form, FormProvider, useForm } from "react-hook-form";
+import {  FormProvider, useForm } from "react-hook-form";
 import {
   FormField,
   FormItem,
@@ -19,13 +19,13 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { toast } from "@/hooks/use-toast";
+import Loader from "@/components/ui/Loader";
 // Removed unused NextResponse import
 
 const SignIn = () => { // Capitalized the component name for convention
   const router = useRouter();
   const [username, setUsername] = useState(""); // Removed unused isUserNameUnique state
-  const [debouncedValue] = useDebounceValue(username, 500); // Removed setValue since it's not used
-  const [isUserNameUniqueMessage, setIsUserNameUniqueMessage] = useState(""); // Keep if you plan to use it
+  const [isLogedIn , setisLogedIn] = useState(true);
 
   const form = useForm<z.infer<typeof signInValidator>>({
     resolver: zodResolver(signInValidator),
@@ -36,6 +36,7 @@ const SignIn = () => { // Capitalized the component name for convention
   });
 
   const onSubmit = async (values: z.infer<typeof signInValidator>) => {
+    setisLogedIn(false);
     const result = await signIn("credentials", {
       redirect: false,
       email: values.email,
@@ -50,6 +51,7 @@ const SignIn = () => { // Capitalized the component name for convention
     } else {
       router.push("/"); // Redirect only if no error
     }
+    setisLogedIn(true);
   };
 
   return (
@@ -102,9 +104,14 @@ const SignIn = () => { // Capitalized the component name for convention
                 <div className="text-red-600 hover:text-black">Sign Up</div>
               </Link>
             </div>
-            <div className="flex justify-center items-center">
-              <Button type="submit">Sign-in</Button>
-            </div>
+            {
+              isLogedIn ? 
+              ( <div className="flex justify-center items-center">
+                <Button type="submit">Sign-in</Button>
+              </div>) :
+              <Loader/>
+            }
+           
           </form>
         </FormProvider>
       </div>

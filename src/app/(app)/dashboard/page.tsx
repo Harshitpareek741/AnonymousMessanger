@@ -13,7 +13,7 @@ const Dashboard = () => {
   const [acceptMessage, setAcceptMessage] = useState(true);
   const [message, setMessages] = useState<Message[]>([]);
   const [username, setUsername] = useState("Unknown");
-  const link = "http://localhost:3000";
+  const link = "https://anonymous-messanger-orpin.vercel.app";
   const inpVal = `${link}/u/${username}`;
   const router = useRouter();
   const { toast } = useToast();
