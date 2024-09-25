@@ -1,12 +1,7 @@
 import mongoose from "mongoose";
 
-const MONGODB_URI = process.env.MONGODB_URI || "";
 
-type ConnectionObject = {
-    isConnected?: number;
-};
 
-const connection: ConnectionObject = {};
 
 async function dbConnect(): Promise<void> {
     try {

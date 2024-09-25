@@ -1,8 +1,7 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react"; // Removed unused useEffect import
 import { useDebounceValue } from "usehooks-ts";
-import axios from "axios";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormProvider, useForm } from "react-hook-form";
@@ -11,51 +10,47 @@ import {
   FormItem,
   FormLabel,
   FormControl,
-  FormDescription,
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { signUpValidator } from "@/schemas/signUpSchema";
+import { signInValidator } from "@/schemas/signInSchema";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { signInValidator } from "@/schemas/signInSchema";
 import { signIn } from "next-auth/react";
 import { toast } from "@/hooks/use-toast";
-import { NextResponse } from "next/server";
+// Removed unused NextResponse import
 
-const signin = () => {
+const SignIn = () => { // Capitalized the component name for convention
   const router = useRouter();
-  const [username, setUsername] = useState("");
-  const [isUserNameUnique, setIsUserNameUnique] = useState(false);
-  const [debouncedValue, setValue] = useDebounceValue(username, 500);
-  const [isUserNameUniqueMessage, setIsUserNameUniqueMessage] = useState("");
+  const [username, setUsername] = useState(""); // Removed unused isUserNameUnique state
+  const [debouncedValue] = useDebounceValue(username, 500); // Removed setValue since it's not used
+  const [isUserNameUniqueMessage, setIsUserNameUniqueMessage] = useState(""); // Keep if you plan to use it
 
   const form = useForm<z.infer<typeof signInValidator>>({
     resolver: zodResolver(signInValidator),
     defaultValues: {
-      email : "",
-      password : ""
+      email: "",
+      password: "",
     },
   });
 
   const onSubmit = async (values: z.infer<typeof signInValidator>) => {
-    const result = await signIn('credentials',{
-      redirect : false , 
-      email : values.email,
-      password : values.password
-    })
-    if(result?.error){
+    const result = await signIn("credentials", {
+      redirect: false,
+      email: values.email,
+      password: values.password,
+    });
+    if (result?.error) {
       toast({
         title: "Error",
         description: result.error,
-        variant : "default"
-      })
+        variant: "default",
+      });
+    } else {
+      router.push("/"); // Redirect only if no error
     }
-    router.push('/');
   };
-
-
 
   return (
     <div className="bg-slate-400 h-screen w-screen flex justify-center items-center">
@@ -65,7 +60,6 @@ const signin = () => {
         </h1>
         <FormProvider {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          
             <FormField
               control={form.control}
               name="email"
@@ -104,14 +98,12 @@ const signin = () => {
             />
             <div className="flex flex-row justify-evenly">
               <p>Not Registered yet</p>
-              <div>
               <Link href="/sign-up">
                 <div className="text-red-600 hover:text-black">Sign Up</div>
               </Link>
-              </div>
             </div>
             <div className="flex justify-center items-center">
-                <Button type="submit">Sign-in</Button>
+              <Button type="submit">Sign-in</Button>
             </div>
           </form>
         </FormProvider>
@@ -120,4 +112,4 @@ const signin = () => {
   );
 };
 
-export default signin;
+export default SignIn; // Exported as default

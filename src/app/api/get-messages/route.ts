@@ -6,7 +6,7 @@ import { NextResponse } from "next/server";
 
 dbConnect(); // Ensure database connection
 
-export async function GET(request: Request) {
+export async function GET() {
     // Retrieve the session using next-auth
     const session = await getServerSession(authOptions);
 

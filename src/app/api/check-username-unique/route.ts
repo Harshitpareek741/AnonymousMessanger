@@ -3,49 +3,47 @@ import userModel from "@/models/User";
 import { userNameValidator } from "@/schemas/signUpSchema";
 import { NextResponse } from "next/server";
 
+export async function GET(request: Request) {
+    await dbConnect();
+    
+    try {
+        // Read the search parameters directly from the request object
+        const url = new URL(request.url);
+        const username = url.searchParams.get('username');
 
+        console.log("Username from query params:", username);
 
-export async function GET(request : Request){
-   await dbConnect();
-   try{
-    const {searchParams} = new URL(request.url);
-    const queryParams = {
-        username : searchParams.get('username'),
+        // Validate the username
+        const result = userNameValidator.safeParse(username);
+        console.log("Validation result:", result.success);
+
+        if (!result.success) {
+            const errorMessages = result.error.errors.map(err => err.message);
+            return NextResponse.json({
+                status: 405,
+                message: errorMessages,
+            });
+        }
+
+        // Check if the user already exists
+        const isUserExist = await userModel.findOne({ username });
+
+        if (isUserExist) {
+            return NextResponse.json({
+                status: 409,
+                message: "User already exists",
+            });
+        } else {
+            return NextResponse.json({
+                status: 200,
+                message: "User is unique",
+            });
+        }
+    } catch (err) {
+        console.error("Error:", err);
+        return NextResponse.json({
+            status: 500,
+            message: "Something went wrong",
+        });
     }
-    console.log(queryParams);
-   const result = userNameValidator.safeParse(queryParams.username);
-   console.log("result" + result.success);
-   if(!result.success){
-    const errorMessages = result.error.errors.map(err => err.message);
-     return NextResponse.json({
-        status : 405 , 
-        message : errorMessages,
-     });
-   }
-   const username = queryParams.username ; 
-   console.log(username);
-   
-   const isUserExist = await userModel.findOne({username});
-   
-   if(isUserExist){
-     return NextResponse.json({
-        status : 409 , 
-        message : "User already exist",
-     });
-   }
-   else{
-    return NextResponse.json({
-        status : 200 , 
-        message : "User is Unique",
-     });
-   }
-}
-catch(err){
-    console.log(err);
-    return NextResponse.json({
-        status : 500 , 
-        message : "Something went wrong",
-    });
-}
-
 }

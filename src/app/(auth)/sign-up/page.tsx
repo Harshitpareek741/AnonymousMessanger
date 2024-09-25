@@ -5,24 +5,24 @@ import { useDebounceValue } from "usehooks-ts";
 import axios from "axios";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Form, FormProvider, useForm } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
 import {
   FormField,
   FormItem,
   FormLabel,
   FormControl,
-  FormDescription,
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { signUpValidator } from "@/schemas/signUpSchema";
 import { Button } from "@/components/ui/button";
-import { Loader } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import email from "next-auth/providers/email";
 
-const signup = () => {
+
+
+
+const SignUp = () => {
   const router = useRouter();
   const [username, setUsername] = useState("");
   const [isUserNameUnique, setIsUserNameUnique] = useState(false);
@@ -165,4 +165,4 @@ const signup = () => {
   );
 };
 
-export default signup;
+export default SignUp;

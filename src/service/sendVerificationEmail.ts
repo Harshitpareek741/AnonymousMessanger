@@ -6,7 +6,7 @@ export async function sendVerificationEmail(email: string, username: string, otp
     try {
         console.log("Sending email to:", email, "with OTP:", otp);
         
-        const { data, error } = await resend.emails.send({
+        const {  error } = await resend.emails.send({
           from: 'Acme <onboarding@resend.dev>',
           to: [email],
             subject: 'Verification email',

@@ -1,12 +1,10 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Switch } from "@/components/ui/switch";
 import axios from "axios";
 import { Message } from "@/models/User";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/options";
 import { getSession } from "next-auth/react";
 import Navbar from "@/components/ui/NavBar";
 import { useRouter } from "next/navigation";
@@ -14,22 +12,41 @@ import { useRouter } from "next/navigation";
 const Dashboard = () => {
   const [acceptMessage, setAcceptMessage] = useState(true);
   const [message, setMessages] = useState<Message[]>([]);
-  const [username , setUsername] = useState("Unknown");
+  const [username, setUsername] = useState("Unknown");
   const link = "http://localhost:3000";
   const inpVal = `${link}/u/${username}`;
   const router = useRouter();
   const { toast } = useToast();
 
-  useEffect( () => {
-    async function getusername(){
-      const session = await getSession(); 
-     if (!session) return;
-    setUsername(session.user?.username || "unknown");
+  const getMessages = useCallback(async () => {
+    try {
+      const { data: acceptData } = await axios.get("/api/accept-message");
+      setAcceptMessage(acceptData.isAcceptingMessage);
+
+      const { data: messageData } = await axios.get("/api/get-messages");
+      setMessages(messageData.messages);
+    } catch (error) {
+      console.error("Error fetching messages:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load messages.",
+        variant: "destructive",
+      });
     }
-    // Fetch initial messages and switch state on mount
-    getusername();
-    getMessages();
-  }, []);
+  }, [toast]);
+
+  useEffect(() => {
+    const getusername = async () => {
+      const session = await getSession(); 
+      if (!session) return;
+      setUsername(session.user?.username || "unknown");
+    };
+
+    // Fetch username and messages when component mounts
+    getusername().then(() => {
+      getMessages();
+    });
+  }, [getMessages]); // Include getMessages as a dependency
 
   const handleCopyInput = () => {
     navigator.clipboard.writeText(inpVal);
@@ -59,33 +76,26 @@ const Dashboard = () => {
     }
   };
 
-  const getMessages = async () => {
+  const handleDelete = async (createdAt: Date) => {
     try {
-      const { data: acceptData } = await axios.get("/api/accept-message");
-      setAcceptMessage(acceptData.isAcceptingMessage);
-
-      const { data: messageData } = await axios.get("/api/get-messages");
-      setMessages(messageData.messages);
+      const response = await axios.post("/api/delete-message", { createdAt, username });
+      toast({
+        title: response.data.message,
+      });
+      router.refresh(); // Refresh the page to see updated messages
     } catch (error) {
-      console.error("Error fetching messages:", error);
+      console.error("Error deleting message:", error);
       toast({
         title: "Error",
-        description: "Failed to load messages.",
+        description: "Failed to delete the message.",
         variant: "destructive",
       });
     }
   };
-  const handleDelete = async (createdAt : Date) => {
-    console.log(createdAt);
-     const response = await axios.post("/api/delete-message",{createdAt , username});
-     toast({
-      title : response.data.message
-     })
-     router.refresh();
-  }
+
   return (
     <div className="h-screen w-screen p-8 bg-gray-50"> 
-    <Navbar />
+      <Navbar />
       <div className="max-w-4xl mx-auto">
         <div className="text-4xl font-bold text-gray-800 my-6">
           Welcome to your Dashboard
@@ -131,13 +141,13 @@ const Dashboard = () => {
                 className="p-4 mb-4 bg-white border rounded-lg shadow-md flex flex-row justify-between items-center"
               >
                 <div className="flex flex-col">
-                <p className="text-sm text-gray-600">
-                  {new Date(msg.createdAt).toLocaleString()}
-                </p>
-                <p className="mt-2 text-lg">{msg.content}</p>
+                  <p className="text-sm text-gray-600">
+                    {new Date(msg.createdAt).toLocaleString()}
+                  </p>
+                  <p className="mt-2 text-lg">{msg.content}</p>
                 </div>
                 <div className="text-center">
-                <Button onClick={()=>handleDelete(msg.createdAt)}>Delete</Button>
+                  <Button onClick={() => handleDelete(msg.createdAt)}>Delete</Button>
                 </div>
               </div>
             ))
