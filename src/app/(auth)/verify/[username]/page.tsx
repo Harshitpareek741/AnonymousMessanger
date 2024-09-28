@@ -15,9 +15,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
 import { signIn } from "next-auth/react";
 import { useParams, useSearchParams, useRouter } from "next/navigation"; // Correct import from 'next/navigation'
-import React from "react";
+import React, { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
+import { v4 as uuidv4 } from 'uuid';
 
 const Verify = () => {
   const { toast } = useToast();
@@ -28,16 +29,45 @@ const Verify = () => {
   const username = params.username;
   const email = searchParams.get("email");
   const password = searchParams.get("password");
+  
+  useEffect(()=>{
+    async function directLogin(){
+      if(!email)return ; 
+
+      if(email.endsWith("@skit.ac.in")){
+        console.log("yeee");
+        toast({
+          title: "user successfully registered",
+        });
+
+        const result = await signIn("credentials", {
+          redirect: false,
+          email: email,
+          password: password,
+        });
+    
+        if (result?.error) {
+          toast({
+            title: "Error",
+            description: result.error,
+            variant: "default",
+          });
+        } else {
+          router.push("/"); // Ensure this uses the correct router from next/navigation
+        }
+      }
+    }
+      directLogin();
+  },[email , password]);
 
   const onSubmit = async (values: z.infer<typeof verifyVelidator>) => {
     const payload = { ...values, username };
-    console.log("Payload: ", payload);
-
+    
     try {
       const response = await axios.post("/api/verify-code", payload);
       if (response.data.status === 200) {
         toast({
-          title: response.data.message,
+          title: "user successfully registered",
         });
 
         const result = await signIn("credentials", {
@@ -75,6 +105,7 @@ const Verify = () => {
   return (
     <div className="flex h-screen w-screen justify-center items-center">
       <div className="text-center">
+      <h1>if u loged in Directly wait for few seconds</h1>
         <h1>Welcome {username}</h1>
         <FormProvider {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">

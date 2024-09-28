@@ -12,7 +12,9 @@ export async function POST(request: Request) {
 
     try {
         const existingUser = await userModel.findOne({ email });
+
         if (existingUser) {
+            // Update the existing user details
             if (existingUser.isVerified) {
                 return NextResponse.json({ error: "User already exists" }, { status: 400 });
             } else {
@@ -24,6 +26,7 @@ export async function POST(request: Request) {
                 await existingUser.save();
             }
         } else {
+            // Create a new user
             const hashedPassword = await bcrypt.hash(password, 10);
             const newUser = new userModel({
                 username,
@@ -35,26 +38,36 @@ export async function POST(request: Request) {
                 isAcceptingMessage: true,
                 messages: []
             });
-         
-        try{  await newUser.save();}
-        catch(err){ console.log("error in saving" + err);}
+
+            await newUser.save();
+            
         }
-    } catch (error) {
-        console.error("Error during user registration:", error);
-        return NextResponse.json({ success: false, message: "Error during registration" }, { status: 500 });
-    }
 
-    try {
+        // Set the user as verified if the email ends with '@skit.ac.in'
+        if (email.endsWith("@skit.ac.in")) {
+            const userToVerify = await userModel.findOne({ email });
+            if (userToVerify) {
+                userToVerify.isVerified = true;
+                console.log(userToVerify.isVerified);
+                console.log("User saved");
+                await userToVerify.save();
+                return NextResponse.json({
+                    success: true,
+                    message: "User registered successfully, email verification required"
+                })
+            }
+        }
+
+        // Send the verification email
         const response = await sendVerificationEmail(email, username, verifyCode);
-
         if (!response.success) {
             return NextResponse.json({ success: false, message: response.message }, { status: 500 });
         }
 
-        return NextResponse.json({ success: true, message: "Verification email sent successfully" }, { status: 200 });
+        return NextResponse.json({ success: true, message: "User registered successfully, verification email sent" }, { status: 200 });
 
     } catch (error) {
-        console.error("Error sending verification email:", error);
-        return NextResponse.json({ success: false, message: "Failed to send verification email" }, { status: 500 });
+        console.error("Error during user registration:", error);
+        return NextResponse.json({ success: false, message: "Error during registration" }, { status: 500 });
     }
 }

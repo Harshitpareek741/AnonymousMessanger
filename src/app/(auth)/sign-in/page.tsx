@@ -24,7 +24,6 @@ import Loader from "@/components/ui/Loader";
 
 const SignIn = () => { // Capitalized the component name for convention
   const router = useRouter();
-  const [username, setUsername] = useState(""); // Removed unused isUserNameUnique state
   const [isLogedIn , setisLogedIn] = useState(true);
 
   const form = useForm<z.infer<typeof signInValidator>>({
@@ -111,7 +110,6 @@ const SignIn = () => { // Capitalized the component name for convention
               </div>) :
               <Loader/>
             }
-           
           </form>
         </FormProvider>
       </div>

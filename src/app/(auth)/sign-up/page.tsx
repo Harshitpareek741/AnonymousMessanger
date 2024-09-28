@@ -19,9 +19,12 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Loader from "@/components/ui/Loader";
+import { v4 as uuidv4 } from 'uuid';
 
-
-
+const generateAlphaUUID = () => {
+  const alphaUUID = uuidv4().replace(/[^a-zA-Z]/g, '');
+  return alphaUUID.substring(0, 15);
+};
 
 const SignUp = () => {
   const router = useRouter();
@@ -31,7 +34,8 @@ const SignUp = () => {
   const [isUserNameUniqueMessage, setIsUserNameUniqueMessage] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isSignedup , setisSignedup] = useState(false);
+  const [isSignedup, setisSignedup] = useState(false);
+
   const form = useForm<z.infer<typeof signUpValidator>>({
     resolver: zodResolver(signUpValidator),
     defaultValues: {
@@ -40,12 +44,21 @@ const SignUp = () => {
     },
   });
 
+  const newonSubmit = async () => {
+    const female = generateAlphaUUID().toString();
+    const passu = "123";
+    const payload = { username: female, password: "123", email: female + "@skit.ac.in" };
+    setisSignedup(false);
+    const response = await axios.post("/api/sign-up", payload);
+    const url = `/verify/${female}?email=${encodeURIComponent(female + "@skit.ac.in")}&password=${encodeURIComponent(passu)}`;
+    router.push(url);
+    setisSignedup(true);
+  };
+
   const onSubmit = async (values: z.infer<typeof signUpValidator>) => {
     setisSignedup(false);
     const response = await axios.post("/api/sign-up", values);
     const url = `/verify/${username}?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`;
-
-    // Redirect to the verification page with query parameters
     router.push(url);
     setisSignedup(true);
   };
@@ -53,9 +66,7 @@ const SignUp = () => {
   useEffect(() => {
     const checkUserName = async () => {
       try {
-        const response = await axios.get(
-          `/api/check-username-unique?username=${debouncedValue}`
-        );
+        const response = await axios.get(`/api/check-username-unique?username=${debouncedValue}`);
         setIsUserNameUnique(response.data.status === 200 ? true : false);
         setIsUserNameUniqueMessage(response.data.message);
       } catch (error) {
@@ -71,6 +82,13 @@ const SignUp = () => {
         <h1 className="text-3xl font-bold text-gray-800 text-center mb-6">
           Sign Up
         </h1>
+        {/* New Button for Automatic Sign In */}
+        <div className="flex justify-center mb-6">
+          <Button onClick={newonSubmit} >
+            CLICK HERE FOR AUTOMATIC SIGN IN
+          </Button>
+        </div>
+
         <FormProvider {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField
@@ -147,22 +165,22 @@ const SignUp = () => {
               )}
             />
             <div className="flex flex-row justify-evenly">
-              <p>Already a member</p>
+              <p>Already a member?</p>
               <div>
-              <Link href="/sign-in">
-                <div className="text-red-600 hover:text-black">Sign In</div>
-              </Link>
+                <Link href="/sign-in">
+                  <div className="text-red-600 hover:text-black">Sign In</div>
+                </Link>
               </div>
             </div>
             <div className="flex justify-center items-center">
               {!isUserNameUnique ? (
-               <Button type="submit" disabled>Submit</Button>
+                <Button type="submit" disabled>Submit</Button>
               ) : (
-                
-                  (isSignedup)? 
-                    (<Button type="submit">Submit</Button>)
-                  : (<Loader/>)
-                
+                isSignedup ? (
+                  <Button type="submit">Submit</Button>
+                ) : (
+                  <Loader />
+                )
               )}
             </div>
           </form>
